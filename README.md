@@ -27,3 +27,7 @@ outside of the error location is replaced by ".".
 2 | ......(1 + 1
 3 |  * 3)...
 ```
+
+## Documentation
+
+https://armael.github.io/pp_loc/pp_loc/
