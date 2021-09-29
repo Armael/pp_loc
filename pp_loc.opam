@@ -23,6 +23,5 @@ This library provides support for quoting and highlighting the input fragment th
 depends: [
   "ocaml" {>= "4.08.0"}
   "dune" {>= "1.10"}
-  "stdlib-shims" {!= "0"}
   "odoc" {with-doc}
 ]

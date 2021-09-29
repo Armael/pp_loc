@@ -13,7 +13,6 @@
   (depends
     (ocaml (>= 4.08.0))
     (dune (>= 1.10))
-    (stdlib-shims (<> 0))
     (odoc :with-doc)
   )
   (synopsis "Quote and highlight input fragments at a given source location")
