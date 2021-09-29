@@ -1,4 +1,4 @@
-(lang dune 1.10)
+(lang dune 2.7)
 (generate_opam_files true)
 
 (name pp_loc)
@@ -7,12 +7,13 @@
 (authors "Armaël Guéneau <armael.gueneau@ens-lyon.org>")
 (maintainers "Armaël Guéneau <armael.gueneau@ens-lyon.org>, Steffen Smolka <smolka@cs.cornell.edu>")
 (documentation "https://Armael.github.io/pp_loc/pp_loc/")
+(license MIT)
 
 (package
   (name pp_loc)
   (depends
     (ocaml (>= 4.08.0))
-    (dune (>= 1.10))
+    dune
     (odoc :with-doc)
   )
   (synopsis "Quote and highlight input fragments at a given source location")
