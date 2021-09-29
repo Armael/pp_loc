@@ -7,9 +7,9 @@ build: [
   ["dune" "build" "-p" name "@doc"] {with-doc}
 ]
 maintainer: [
-  "Armaël Guéneau <armael.gueneau@inria.fr>, Steffen Smolka <smolka@cs.cornell.edu>"
+  "Armaël Guéneau <armael.gueneau@ens-lyon.org>, Steffen Smolka <smolka@cs.cornell.edu>"
 ]
-authors: ["Armaël Guéneau <armael.gueneau@inria.fr>"]
+authors: ["Armaël Guéneau <armael.gueneau@ens-lyon.org>"]
 bug-reports: "https://github.com/Armael/pp_loc/issues"
 homepage: "https://github.com/Armael/pp_loc"
 doc: "https://Armael.github.io/pp_loc/pp_loc/"
@@ -21,8 +21,8 @@ Decent error reporting (for example, in a parser, a compiler, ...) typically inv
 This library provides support for quoting and highlighting the input fragment that corresponds to a given source location (or set of source locations).
 """
 depends: [
-  "ocaml" {>= "4.02.3"}
-  "dune" {build & >= "1.10"}
+  "ocaml" {>= "4.08.0"}
+  "dune" {>= "1.10"}
   "stdlib-shims" {!= "0"}
   "odoc" {with-doc}
 ]

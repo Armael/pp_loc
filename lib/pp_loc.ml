@@ -108,7 +108,8 @@ end
 (******************************************************************************)
 (* Format highlighting tags *)
 
-let single_line_underline_tag = "pp_loc_single_line_underline"
+type Format.stag +=
+   | Single_line_underline_tag
 
 type handle_tag = {
   open_tag : unit -> string;
@@ -124,26 +125,26 @@ let setup_highlight_tags ppf
     ?(single_line_underline = handle_tag_default)
     ()
   =
-  let mark_open_tag ~or_else s =
-    if s = single_line_underline_tag then
-      single_line_underline.open_tag ()
-    else
-      or_else s
+  let mark_open_stag ~or_else = function
+    | Single_line_underline_tag ->
+        single_line_underline.open_tag ()
+    | stag ->
+      or_else stag
   in
-  let mark_close_tag ~or_else s =
-    if s = single_line_underline_tag then
+  let mark_close_stag ~or_else = function
+    | Single_line_underline_tag ->
       single_line_underline.close_tag ()
-    else
-      or_else s
+    | stag ->
+      or_else stag
   in
-  let functions = Format.pp_get_formatter_tag_functions ppf () in
+  let functions = Format.pp_get_formatter_stag_functions ppf () in
   let functions' = {
     functions with
-    mark_open_tag = (mark_open_tag ~or_else:functions.mark_open_tag);
-    mark_close_tag = (mark_close_tag ~or_else:functions.mark_open_tag);
+    mark_open_stag = (mark_open_stag ~or_else:functions.mark_open_stag);
+    mark_close_stag = (mark_close_stag ~or_else:functions.mark_open_stag);
   } in
   Format.pp_set_mark_tags ppf true; (* enable tags *)
-  Format.pp_set_formatter_tag_functions ppf functions';
+  Format.pp_set_formatter_stag_functions ppf functions';
   ()
 
 (******************************************************************************)
@@ -301,13 +302,14 @@ let highlight_quote ppf
         Format.fprintf ppf "%*s   " (String.length line_nb) "";
         for pos = line_start_cnum to rightmost.pos_cnum - 1 do
           if ISet.is_start iset ~pos <> None then
-            Format.fprintf ppf "@{<%s>" single_line_underline_tag;
+            Format.pp_open_stag ppf Single_line_underline_tag;
           if ISet.mem iset ~pos then Format.pp_print_char ppf '^'
           else Format.pp_print_char ppf ' ';
           if ISet.is_end iset ~pos <> None then
-            Format.fprintf ppf "@}"
+            Format.pp_close_stag ppf ();
         done;
-        Format.fprintf ppf "@}@,"
+        Format.pp_close_stag ppf (); (* XXX ? *)
+        Format.fprintf ppf "@,"
     | _ ->
         (* Multi-line error *)
         pp_two_columns ~sep:"|" ~max_lines ppf

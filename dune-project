@@ -11,7 +11,7 @@
 (package
   (name pp_loc)
   (depends
-    (ocaml (>= 4.02.3))
+    (ocaml (>= 4.08.0))
     (dune (>= 1.10))
     (stdlib-shims (<> 0))
     (odoc :with-doc)
