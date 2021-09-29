@@ -4,15 +4,15 @@
 (name pp_loc)
 (version 1.0.0)
 (source (github Armael/pp_loc))
-(authors "Armaël Guéneau <armael.gueneau@inria.fr>")
-(maintainers "Armaël Guéneau <armael.gueneau@inria.fr>, Steffen Smolka <smolka@cs.cornell.edu>")
+(authors "Armaël Guéneau <armael.gueneau@ens-lyon.org>")
+(maintainers "Armaël Guéneau <armael.gueneau@ens-lyon.org>, Steffen Smolka <smolka@cs.cornell.edu>")
 (documentation "https://Armael.github.io/pp_loc/pp_loc/")
 
 (package
   (name pp_loc)
   (depends
     (ocaml (>= 4.02.3))
-    (dune (and :build (>= 1.10)))
+    (dune (>= 1.10))
     (stdlib-shims (<> 0))
     (odoc :with-doc)
   )
