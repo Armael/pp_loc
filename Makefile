@@ -7,6 +7,9 @@ doc:
 clean:
 	dune clean
 
+watch:
+	dune build @install -w
+
 pushdoc:
 	git stash
 	dune build @doc
