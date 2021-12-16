@@ -1,2 +1,3 @@
 (library
+  (private_modules line_offsets)
   (public_name pp_loc))
