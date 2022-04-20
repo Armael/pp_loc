@@ -22,18 +22,19 @@ module Vec = struct
   let to_array self = Array.sub self.arr 0 self.sz
 end
 
+(* maps i to the offset of the beginning of the i-th line *)
 type t = int array
 
 let from_string (s:string) : t =
   let lines = Vec.create() in
-  Vec.push lines 0; (* first line is free *)
+  Vec.push lines 0; (* first line is easy *)
   let size = String.length s in
   let i = ref 0 in
   while !i < size do
     match String.index_from_opt s !i '\n' with
     | None -> i := size
     | Some j ->
-      Vec.push lines j;
+      Vec.push lines (j+1);
       i := j+1;
   done;
   Vec.to_array lines
@@ -46,7 +47,7 @@ let from_chan (cin:in_channel) : t =
   from_string (Buffer.contents buf)
 
 let find_line_offset (self:t) ~line : int =
-  let line = line-1 in
+  let line = line-1 in (* lines are 1-based *)
   if line >= Array.length self then (
     Array.length self
   ) else (
@@ -55,7 +56,7 @@ let find_line_offset (self:t) ~line : int =
 
 let find_offset (self:t) ~line ~col : int =
   let off = find_line_offset self ~line in
-  off + (col - 1)
+  off + col
 
 let line_col_of_offset (self:t) (off:int) : int * int =
   (* binary search *)
@@ -79,7 +80,7 @@ let line_col_of_offset (self:t) (off:int) : int * int =
       high := middle - 1;
     )
   done;
-  let col = off - self.(!low) + 1 in
+  let col = off - self.(!low) in
   let line = !low + 1 in
   line, col
 ;;

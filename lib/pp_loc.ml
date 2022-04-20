@@ -134,7 +134,8 @@ module Position = struct
     | Line_col(line,col) ->
       let lazy index = input.Input.line_offsets in
       let offset = Line_offsets.find_offset index ~line ~col in
-      {Lexing.pos_cnum=col; pos_lnum=line; pos_bol=offset-col;
+      let bol = offset - col in
+      {Lexing.pos_cnum=col; pos_lnum=line; pos_bol=bol;
        pos_fname="";}
 end
 

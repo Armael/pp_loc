@@ -18,11 +18,13 @@ module Position : sig
   val of_line_col : int -> int -> t
   (** [of_line_col line col] builds the position indicating the character
       at column [col] and line [line] of the input.
-      Lines start at 1, columns start at 0.
+      Lines and columns start at 1.
   *)
 end
 
-(** The type of source locations: start position, end position *)
+(** The type of source locations: start position, end position.
+    The end position is not inclusive, it is just {i past} the end
+    of the highlighted range. *)
 type loc = Position.t * Position.t
 
 (** Abstraction over the input containing the input to read from. *)
