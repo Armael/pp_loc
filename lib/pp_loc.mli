@@ -9,13 +9,16 @@ module Position : sig
   type t
 
   val of_lexing : Lexing.position -> t
+  (** Convert position. The filename is ignored, the offset, line, and column
+      are potentially used so they matter. *)
 
   val of_offset : int -> t
+  (** Build a position from a byte offset in the input. *)
 
   val of_line_col : int -> int -> t
   (** [of_line_col line col] builds the position indicating the character
       at column [col] and line [line] of the input.
-      @since 2.0
+      Lines start at 1, columns start at 0.
   *)
 end
 
@@ -50,7 +53,7 @@ module Input : sig
   (** Creates an input from functions.
 
       @param [seek] is a function to move to a given offset in the input.
-      It will be called once, before any call to [read_char].
+      A call to [seek] will come before any call to [read_char].
       If the call to [seek] fails and returns [Error `Invalid_position], the
       input is considered to be unreadable and will be treated equivalenty as the
       empty input. This might happen even if the input is valid, if one tries to

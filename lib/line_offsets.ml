@@ -40,6 +40,7 @@ let from_string (s:string) : t =
 
 let from_chan (cin:in_channel) : t =
   let buf = Buffer.create 1024 in
+  (try seek_in cin 0 with _ -> ());
   (try while true do Buffer.add_channel buf cin (16 * 1024) done; assert false
    with End_of_file -> ());
   from_string (Buffer.contents buf)
