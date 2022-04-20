@@ -403,11 +403,12 @@ let pp
     (locs: loc list)
   =
 
+  let input_raw, close_input = Input.open_raw input in
+
   (* convert locations so that the positions are full lexing positions *)
   let locs = match locs with
     | [] -> []
     | _ ->
-      let input_raw, close_input = Input.open_raw input in
       let locs =
         List.map
           (fun (start_pos,end_pos) ->
@@ -415,17 +416,14 @@ let pp
              Position.to_full input_raw end_pos)
           locs
       in
-      close_input ();
       locs
   in
 
   (* The fact that [get_lines] is only called once by [highlight_quote] is
      important here, because it might consume the input... *)
   let get_lines ~start_pos ~end_pos =
-    let input_raw, close_input = Input.open_raw input in
-    let lines =
-      lines_around ~start_pos ~end_pos ~input:input_raw in
-    close_input ();
-    lines
+    let lines = lines_around ~start_pos ~end_pos ~input:input_raw in lines
   in
-  highlight_quote ppf ~get_lines ~max_lines locs
+  highlight_quote ppf ~get_lines ~max_lines locs;
+  close_input ();
+  ()
