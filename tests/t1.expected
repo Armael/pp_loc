@@ -1,0 +1,3 @@
+loc is: 2 | let rec f x =
+                ^^^
+        

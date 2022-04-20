@@ -7,8 +7,9 @@ doc:
 clean:
 	dune clean
 
+WATCH?=@install
 watch:
-	dune build @install -w
+	dune build $(WATCH) -w
 
 pushdoc:
 	git stash
