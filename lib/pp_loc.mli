@@ -39,7 +39,7 @@ module Input : sig
   (** {2 High-level functions} *)
 
   (** [file fname] is an input that corresponds to the content of the file named
-     [fname]. *)
+      [fname]. *)
   val file : string -> t
 
   (** [string s] is an input that corresponds to the content of the string [s].
@@ -50,18 +50,28 @@ module Input : sig
      [b]. *)
   val bytes : bytes -> t
 
+  (** [in_channel cin] is an input that correspond to the input channel [cin].
+      The channel must correspond to a file: it must be possible to call
+      [seek_in] on the channel without error.
+
+      Creating an input using [in_channel] instead of [file] is more efficient
+      if one needs to perform successive calls of [Pp_loc.pp] on the same input.
+      Otherwise (or if having the best performance is not important), it is
+      simpler (and thus recommended) to use [file]. *)
+  val in_channel : in_channel -> t
+
   (** {2 Low-level functions} *)
 
   (** Creates an input from functions.
 
-      @param [seek] is a function to move to a given offset in the input.
+      @param seek a function to move to a given offset in the input.
       A call to [seek] will come before any call to [read_char].
       If the call to [seek] fails and returns [Error `Invalid_position], the
       input is considered to be unreadable and will be treated equivalenty as the
       empty input. This might happen even if the input is valid, if one tries to
       highlight an invalid location.
 
-      @param read_char is used to read the next char from the currently seeked
+      @param read_char used to read the next char from the currently seeked
       position, and seek one char forward.
 
       @param line_offsets computes the byte offset of each line in the file.
