@@ -21,6 +21,12 @@ let pos_end = P.of_line_col 2 5
 let () =
   Format.printf "loc is: %a@." (Pp_loc.pp ~max_lines:5 ~input) [pos_start, pos_end]
 
+let pos_start = P.of_offset 15
+let pos_end = P.of_offset 17
+
+let () =
+  Format.printf "loc is: %a@." (Pp_loc.pp ~max_lines:5 ~input) [pos_start, pos_end]
+
 
 
 let src = {|let x =
@@ -40,6 +46,12 @@ let () =
 
 let pos_start = P.of_line_col 2 2
 let pos_end = P.of_line_col 3 7
+
+let () =
+  Format.printf "loc is: %a@." (Pp_loc.pp ~max_lines:5 ~input) [pos_start, pos_end]
+
+let pos_start = P.of_offset 9
+let pos_end = P.of_offset 18
 
 let () =
   Format.printf "loc is: %a@." (Pp_loc.pp ~max_lines:5 ~input) [pos_start, pos_end]
