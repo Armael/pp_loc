@@ -118,12 +118,23 @@ module Position = struct
     | Offset of int
     | Line_col of int * int
     | Full of Lexing.position
+    | Shift of t * int
 
   let of_lexing pos = Full pos
   let of_offset i = Offset i
   let of_line_col l c = Line_col (l, c)
+  let shift l n = Shift (l, n)
 
-  let to_full (input:Input.raw) (self:t) : Lexing.position =
+  let rec to_offset (input:Input.raw) (self:t) : int =
+    match self with
+    | Offset offset -> offset
+    | Full pos -> pos.Lexing.pos_cnum
+    | Line_col (line, col) ->
+      let lazy index = input.Input.line_offsets in
+      Line_offsets.find_offset index ~line ~col
+    | Shift (pos, n) -> to_offset input pos + n
+
+  let rec to_full (input:Input.raw) (self:t) : Lexing.position =
     match self with
     | Full pos -> pos
     | Offset offset ->
@@ -131,12 +142,14 @@ module Position = struct
       let line, col = Line_offsets.line_col_of_offset index offset in
       {Lexing.pos_cnum=offset; pos_lnum=line; pos_bol=offset-col;
        pos_fname="";}
-    | Line_col(line,col) ->
+    | Line_col (line, col) ->
       let lazy index = input.Input.line_offsets in
       let offset = Line_offsets.find_offset index ~line ~col in
       let bol = offset - (col - 1) (* columns are 1-based *) in
       {Lexing.pos_cnum=offset; pos_lnum=line; pos_bol=bol;
        pos_fname="";}
+    | Shift (pos, n) ->
+      to_full input (Offset (to_offset input pos + n))
 end
 
 type loc = Position.t * Position.t
