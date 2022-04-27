@@ -1,4 +1,5 @@
 
 (tests
-  (names t1)
+  (names t1 t2 t3)
+  (deps file.ml)
   (libraries pp_loc))

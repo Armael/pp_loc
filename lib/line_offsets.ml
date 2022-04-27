@@ -55,6 +55,7 @@ let find_line_offset (self:t) ~line : int =
   )
 
 let find_offset (self:t) ~line ~col : int =
+  let col = col-1 in (* columns are 1-based *)
   let off = find_line_offset self ~line in
   off + col
 
