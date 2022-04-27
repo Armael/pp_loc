@@ -8,18 +8,18 @@
 module Position : sig
   type t
 
-  val of_lexing : Lexing.position -> t
   (** Convert position. The filename is ignored, the offset, line, and column
       are potentially used so they matter. *)
+  val of_lexing : Lexing.position -> t
 
-  val of_offset : int -> t
   (** Build a position from a byte offset in the input. *)
+  val of_offset : int -> t
 
-  val of_line_col : int -> int -> t
   (** [of_line_col line col] builds the position indicating the character
       at column [col] and line [line] of the input.
       Lines and columns start at 1.
   *)
+  val of_line_col : int -> int -> t
 end
 
 (** The type of source locations: start position, end position.
