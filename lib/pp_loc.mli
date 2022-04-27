@@ -20,6 +20,9 @@ module Position : sig
       Lines and columns start at 1.
   *)
   val of_line_col : int -> int -> t
+
+  (** [shift pos n] is the position located [n] bytes after [pos]. *)
+  val shift : t -> int -> t
 end
 
 (** The type of source locations: start position, end position.
