@@ -1,6 +1,3 @@
-open Lexing
-
-type loc = position * position
 
 let rec list_find_map f = function
   | [] -> None
@@ -49,13 +46,17 @@ module Input = struct
   type raw = {
     seek : int -> (unit, [`Invalid_position]) result;
     read_char : unit -> (char, [`End_of_input]) result;
+    line_offsets : int array lazy_t;
   }
 
   type t =
     | Raw of raw
     | Managed of (unit -> t * (unit -> unit))
 
-  let raw ~seek ~read_char = Raw { seek; read_char }
+  let raw ~seek ~read_char ~line_offsets =
+    let line_offsets = lazy (line_offsets()) in
+    Raw { seek; read_char; line_offsets; }
+
   let managed create = Managed create
 
   let in_channel cin =
@@ -64,7 +65,8 @@ module Input = struct
     let read_char () =
       try Ok (input_char cin)
       with End_of_file | Sys_error _ -> Error `End_of_input in
-    Raw { seek; read_char }
+    let line_offsets = lazy (Line_offsets.from_chan cin) in
+    Raw { seek; read_char; line_offsets }
 
   let file name =
     managed (fun () ->
@@ -75,6 +77,7 @@ module Input = struct
     (b: 'a)
     ~(len: 'a -> int)
     ~(read: 'a -> int -> char)
+    ~(to_string : 'a -> string)
     =
     let cur_pos = ref (-1) in
     let inbound i = i >= 0 && i < len b in
@@ -90,10 +93,11 @@ module Input = struct
         incr cur_pos;
         Ok c
     in
-    Raw { seek; read_char }
+    let line_offsets = lazy (Line_offsets.from_string (to_string b)) in
+    Raw { seek; read_char; line_offsets }
 
-  let string s = buf s ~len:String.length ~read:String.get
-  let bytes b = buf b ~len:Bytes.length ~read:Bytes.get
+  let string s = buf s ~len:String.length ~read:String.get ~to_string:(fun s -> s)
+  let bytes b = buf b ~len:Bytes.length ~read:Bytes.get ~to_string:Bytes.unsafe_to_string
 
   (*****)
 
@@ -104,6 +108,38 @@ module Input = struct
       let r, c' = open_raw i in
       r, (fun () -> c' (); c ())
 end
+
+
+(******************************************************************************)
+(* Positions and locations *)
+
+module Position = struct
+  type t =
+    | Offset of int
+    | Line_col of int * int
+    | Full of Lexing.position
+
+  let of_lexing pos = Full pos
+  let of_offset i = Offset i
+  let of_line_col l c = Line_col (l, c)
+
+  let to_full (input:Input.raw) (self:t) : Lexing.position =
+    match self with
+    | Full pos -> pos
+    | Offset offset ->
+      let lazy index = input.Input.line_offsets in
+      let line, col = Line_offsets.line_col_of_offset index offset in
+      {Lexing.pos_cnum=col; pos_lnum=line; pos_bol=offset-col;
+       pos_fname="";}
+    | Line_col(line,col) ->
+      let lazy index = input.Input.line_offsets in
+      let offset = Line_offsets.find_offset index ~line ~col in
+      let bol = offset - col in
+      {Lexing.pos_cnum=col; pos_lnum=line; pos_bol=bol;
+       pos_fname="";}
+end
+
+type loc = Position.t * Position.t
 
 (******************************************************************************)
 (* Format highlighting tags *)
@@ -266,10 +302,11 @@ let infer_line_numbers
    reads from a file.
 *)
 let highlight_quote ppf
-    ~(get_lines: start_pos:position -> end_pos:position -> input_line list)
+    ~(get_lines: start_pos:Lexing.position -> end_pos:Lexing.position -> input_line list)
     ~(max_lines: int)
     locs
   =
+  let open Lexing in
   let iset = ISet.of_intervals @@ list_filter_map (fun (s, e) ->
     if s.pos_cnum = -1 || e.pos_cnum = -1 then None
     else Some ((s, s.pos_cnum), (e, e.pos_cnum - 1))
@@ -323,7 +360,7 @@ let highlight_quote ppf
     Format.fprintf ppf "@]"
 
 let lines_around
-    ~(start_pos: position) ~(end_pos: position)
+    ~(start_pos: Lexing.position) ~(end_pos: Lexing.position)
     ~(input: Input.raw):
   input_line list
   =
@@ -366,13 +403,28 @@ let pp
     (ppf: Format.formatter)
     (locs: loc list)
   =
+
+  let input_raw, close_input = Input.open_raw input in
+
+  (* convert locations so that the positions are full lexing positions *)
+  let locs = match locs with
+    | [] -> []
+    | _ ->
+      let locs =
+        List.map
+          (fun (start_pos,end_pos) ->
+             Position.to_full input_raw start_pos,
+             Position.to_full input_raw end_pos)
+          locs
+      in
+      locs
+  in
+
   (* The fact that [get_lines] is only called once by [highlight_quote] is
      important here, because it might consume the input... *)
   let get_lines ~start_pos ~end_pos =
-    let input_raw, close_input = Input.open_raw input in
-    let lines =
-      lines_around ~start_pos ~end_pos ~input:input_raw in
-    close_input ();
-    lines
+    let lines = lines_around ~start_pos ~end_pos ~input:input_raw in lines
   in
-  highlight_quote ppf ~get_lines ~max_lines locs
+  highlight_quote ppf ~get_lines ~max_lines locs;
+  close_input ();
+  ()
