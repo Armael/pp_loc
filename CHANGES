@@ -1,3 +1,16 @@
+v2.0.0
+------
+
+Generalize the type of locations to offer more flexibility.
+
+As before, a location corresponds to a pair of begin-end positions.
+However, positions are now abstract. A position can be created as
+before from a Lexing.position. Alternatively, a position can be created
+from a (line,column) pair, or directly from an offset in the file,
+or by shifting an existing position by a given offset.
+
+(contributed by Simon Cruanes)
+
 v1.0.0
 ------
 
