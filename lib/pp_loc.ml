@@ -125,16 +125,22 @@ module Position = struct
   let of_line_col l c = Line_col (l, c)
   let shift l n = Shift (l, n)
 
-  let rec to_offset (input:Input.raw) (self:t) : int =
+  let rec to_offset_raw (input:Input.raw) (self:t) : int =
     match self with
     | Offset offset -> offset
     | Full pos -> pos.Lexing.pos_cnum
     | Line_col (line, col) ->
       let lazy index = input.Input.line_offsets in
       Line_offsets.find_offset index ~line ~col
-    | Shift (pos, n) -> to_offset input pos + n
+    | Shift (pos, n) -> to_offset_raw input pos + n
 
-  let rec to_full (input:Input.raw) (self:t) : Lexing.position =
+  let to_offset (input:Input.t) (self:t) : int =
+    let input, close = Input.open_raw input in
+    let off = to_offset_raw input self in
+    close ();
+    off
+
+  let rec to_lexing_raw (input:Input.raw) (self:t) : Lexing.position =
     match self with
     | Full pos -> pos
     | Offset offset ->
@@ -149,7 +155,13 @@ module Position = struct
       {Lexing.pos_cnum=offset; pos_lnum=line; pos_bol=bol;
        pos_fname="";}
     | Shift (pos, n) ->
-      to_full input (Offset (to_offset input pos + n))
+      to_lexing_raw input (Offset (to_offset_raw input pos + n))
+
+  let to_lexing ?(filename="") (input:Input.t) (self:t) : Lexing.position =
+    let input, close = Input.open_raw input in
+    let pos = to_lexing_raw input self in
+    close ();
+    { pos with pos_fname = filename }
 end
 
 type loc = Position.t * Position.t
@@ -426,8 +438,8 @@ let pp
       let locs =
         List.map
           (fun (start_pos,end_pos) ->
-             Position.to_full input_raw start_pos,
-             Position.to_full input_raw end_pos)
+             Position.to_lexing_raw input_raw start_pos,
+             Position.to_lexing_raw input_raw end_pos)
           locs
       in
       locs
