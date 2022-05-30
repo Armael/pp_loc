@@ -1,35 +1,4 @@
 
-(** A position in a file or string.
-
-    It is abstract to provide more flexibility than {!Lexing.position}.
-
-    @since 2.0
-*)
-module Position : sig
-  type t
-
-  (** Convert position. The filename is ignored, the offset, line, and column
-      are potentially used so they matter. *)
-  val of_lexing : Lexing.position -> t
-
-  (** Build a position from a byte offset in the input. *)
-  val of_offset : int -> t
-
-  (** [of_line_col line col] builds the position indicating the character
-      at column [col] and line [line] of the input.
-      Lines and columns start at 1.
-  *)
-  val of_line_col : int -> int -> t
-
-  (** [shift pos n] is the position located [n] bytes after [pos]. *)
-  val shift : t -> int -> t
-end
-
-(** The type of source locations: start position, end position.
-    The end position is not inclusive, it is just {i past} the end
-    of the highlighted range. *)
-type loc = Position.t * Position.t
-
 (** Abstraction over the input containing the input to read from. *)
 module Input : sig
   (** The abstract input type.
@@ -102,6 +71,46 @@ module Input : sig
     (unit -> t * (unit -> unit)) ->
     t
 end
+
+(** A position in a file or string.
+
+    It is abstract to provide more flexibility than {!Lexing.position}.
+
+    @since 2.0
+*)
+module Position : sig
+  type t
+
+  (** Convert position. The filename is ignored, the offset, line, and column
+      are potentially used so they matter. *)
+  val of_lexing : Lexing.position -> t
+
+  (** Build a position from a byte offset in the input. *)
+  val of_offset : int -> t
+
+  (** [of_line_col line col] builds the position indicating the character
+      at column [col] and line [line] of the input.
+      Lines and columns start at 1.
+  *)
+  val of_line_col : int -> int -> t
+
+  (** [shift pos n] is the position located [n] bytes after [pos]. *)
+  val shift : t -> int -> t
+
+  (** [to_offset input pos] computes the offset in bytes corresponding to
+     position [pos] within [input]. *)
+  val to_offset : Input.t -> t -> int
+
+  (** [to_lexing input pos] computes the full position corresponding to position
+     [pos] within input [input]. The filename is set to [filename] if specified,
+     or to a dummy value otherwise (the empty string). *)
+  val to_lexing : ?filename:string -> Input.t -> t -> Lexing.position
+end
+
+(** The type of source locations: start position, end position.
+    The end position is not inclusive, it is just {i past} the end
+    of the highlighted range. *)
+type loc = Position.t * Position.t
 
 (** Quote the parts of the input corresponding to the input locations.
 

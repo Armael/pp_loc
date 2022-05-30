@@ -1,3 +1,9 @@
+v2.1.0
+------
+
+- Add functions Position.{to_offset,to_lexing}
+  these allow computing an offset/Lexing.position from a Position.t and Input.t
+
 v2.0.0
 ------
 
