@@ -1,0 +1,6 @@
+type t = A | B | C
+
+let foo x =
+  match x with
+  | A -> 0
+  | B -> 1
