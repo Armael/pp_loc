@@ -67,3 +67,19 @@ let pos_end = P.shift pos_start 9
 
 let () =
   Format.printf "loc is: %a@." (Pp_loc.pp ~max_lines:5 ~input) [pos_start, pos_end]
+
+
+
+let src = {|let foo () =
+
+  42 +. 1.
+;;
+|}
+
+let input = Pp_loc.Input.string src
+
+let pos_start = P.of_line_col 2 0
+let pos_end = P.of_line_col 3 5
+
+let () =
+  Format.printf "loc is: %a@." (Pp_loc.pp ~max_lines:5 ~input) [pos_start, pos_end]
