@@ -2,7 +2,7 @@
 (generate_opam_files true)
 
 (name pp_loc)
-(version 2.0.0)
+(version 2.1.0)
 (source (github Armael/pp_loc))
 (authors "Armaël Guéneau <armael.gueneau@ens-lyon.org>")
 (maintainers "Armaël Guéneau <armael.gueneau@ens-lyon.org>, Steffen Smolka <smolka@cs.cornell.edu>")

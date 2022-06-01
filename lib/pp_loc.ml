@@ -36,7 +36,9 @@ let pp_two_columns ?(sep = "|") ?max_lines ppf (lines: (string * string) list) =
   List.iteri (fun k (line_l, line_r) ->
     if k = ellipsed_first then Format.fprintf ppf "...@,";
     if ellipsed_first <= k && k <= ellipsed_last then ()
-    else Format.fprintf ppf "%*s %s %s@," left_column_size line_l sep line_r
+    else if line_r = ""
+      then Format.fprintf ppf "%*s %s@," left_column_size line_l sep
+      else Format.fprintf ppf "%*s %s %s@," left_column_size line_l sep line_r
   ) lines;
   Format.fprintf ppf "@]"
 
